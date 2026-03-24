@@ -5,6 +5,8 @@ import { WhatsAppButton } from './WhatsAppButton';
 export function CatalogView({ onRequestLogin }) {
     const [products, setProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [stockFilter, setStockFilter] = useState('all');
+    const [viewMode, setViewMode] = useState('grid');
     const [cart, setCart] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -25,9 +27,15 @@ export function CatalogView({ onRequestLogin }) {
         else setProducts(data || []);
     }
 
-    const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredProducts = products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStock = 
+            stockFilter === 'all' ? true :
+            stockFilter === 'in_stock' ? product.quantity > 0 :
+            product.quantity === 0;
+            
+        return matchesSearch && matchesStock;
+    });
 
     const addToCart = (product) => {
         setCart(prev => {
@@ -94,14 +102,14 @@ export function CatalogView({ onRequestLogin }) {
             <div className="main-layout" style={{ gridTemplateColumns: isCartOpen ? '1fr 350px' : '1fr' }}>
                 {/* Product Grid */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div className="search-bar">
+                    <div className="search-bar" style={{ display: 'flex', gap: '1rem' }}>
                         <input
                             type="text"
                             placeholder="Buscar en el catálogo..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             style={{
-                                width: '100%',
+                                flex: 1,
                                 padding: '1rem',
                                 fontSize: '1.1rem',
                                 borderRadius: '8px',
@@ -110,6 +118,42 @@ export function CatalogView({ onRequestLogin }) {
                                 color: 'white'
                             }}
                         />
+                        <select
+                            value={stockFilter}
+                            onChange={(e) => setStockFilter(e.target.value)}
+                            style={{
+                                padding: '1rem',
+                                fontSize: '1.1rem',
+                                borderRadius: '8px',
+                                border: '1px solid var(--color-border)',
+                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                color: 'white',
+                                minWidth: '180px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <option value="all" style={{ color: 'black' }}>Todos los productos</option>
+                            <option value="in_stock" style={{ color: 'black' }}>Con stock</option>
+                            <option value="out_of_stock" style={{ color: 'black' }}>Sin stock</option>
+                        </select>
+                        <div className="view-toggle" style={{ border: '1px solid var(--color-border)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                            <button 
+                                className={viewMode === 'grid' ? 'active' : ''} 
+                                onClick={() => setViewMode('grid')}
+                                title="Vista Cuadrícula"
+                                style={{ padding: '0 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                                ⊞
+                            </button>
+                            <button 
+                                className={viewMode === 'list' ? 'active' : ''} 
+                                onClick={() => setViewMode('list')}
+                                title="Vista Lista"
+                                style={{ padding: '0 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                                ☰
+                            </button>
+                        </div>
                     </div>
 
                     {filteredProducts.length === 0 ? (
@@ -118,7 +162,7 @@ export function CatalogView({ onRequestLogin }) {
                             <small>Prueba con otro término de búsqueda.</small>
                         </div>
                     ) : (
-                        <div className="product-grid">
+                        <div className={viewMode === 'grid' ? 'product-grid' : 'product-list-view'}>
                             {filteredProducts.map(product => {
                                 const isAvailable = product.quantity > 0;
                                 return (
@@ -128,16 +172,18 @@ export function CatalogView({ onRequestLogin }) {
                                                 <img src={product.image} alt={product.name} className="product-image" onError={(e) => e.target.style.display = 'none'} />
                                             </div>
                                         )}
-                                        <div className="product-header">
-                                            <h3>{product.name}</h3>
-                                            {isAvailable ? (
-                                                <span className="stock-badge in-stock">Disponible</span>
-                                            ) : (
-                                                <span className="stock-badge low-stock">Agotado</span>
-                                            )}
+                                        <div className="product-info">
+                                            <div className="product-header">
+                                                <h3>{product.name}</h3>
+                                                {isAvailable ? (
+                                                    <span className="stock-badge in-stock">Disponible</span>
+                                                ) : (
+                                                    <span className="stock-badge low-stock">Agotado</span>
+                                                )}
+                                            </div>
+                                            <p className="product-price">${Number(product.price).toFixed(2)}</p>
+                                            {product.description && <p className="product-desc">{product.description}</p>}
                                         </div>
-                                        <p className="product-price">${Number(product.price).toFixed(2)}</p>
-                                        {product.description && <p className="product-desc">{product.description}</p>}
 
                                         {isAvailable && (
                                             <div className="product-actions" style={{ justifyContent: 'center' }}>

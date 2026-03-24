@@ -3,10 +3,18 @@ import { toast } from 'sonner';
 
 export function ProductList({ products, onDelete, onUpdateStock, onEdit }) {
     const [searchTerm, setSearchTerm] = useState('');
+    const [stockFilter, setStockFilter] = useState('all');
+    const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
-    const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredProducts = products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStock = 
+            stockFilter === 'all' ? true :
+            stockFilter === 'in_stock' ? product.quantity > 0 :
+            product.quantity === 0;
+            
+        return matchesSearch && matchesStock;
+    });
 
     if (products.length === 0) {
         return (
@@ -19,14 +27,14 @@ export function ProductList({ products, onDelete, onUpdateStock, onEdit }) {
 
     return (
         <div className="product-list-container">
-            <div className="search-bar" style={{ marginBottom: '1rem' }}>
+            <div className="search-bar" style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
                 <input
                     type="text"
                     placeholder="Buscar producto..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     style={{
-                        width: '100%',
+                        flex: 1,
                         padding: '0.8rem',
                         borderRadius: '8px',
                         border: '1px solid var(--color-border)',
@@ -34,6 +42,39 @@ export function ProductList({ products, onDelete, onUpdateStock, onEdit }) {
                         color: 'var(--color-text)'
                     }}
                 />
+                <select
+                    value={stockFilter}
+                    onChange={(e) => setStockFilter(e.target.value)}
+                    style={{
+                        padding: '0.8rem',
+                        borderRadius: '8px',
+                        border: '1px solid var(--color-border)',
+                        backgroundColor: 'var(--color-bg-card)',
+                        color: 'var(--color-text)',
+                        minWidth: '180px',
+                        cursor: 'pointer'
+                    }}
+                >
+                    <option value="all" style={{ color: 'black' }}>Todos los productos</option>
+                    <option value="in_stock" style={{ color: 'black' }}>Con stock</option>
+                    <option value="out_of_stock" style={{ color: 'black' }}>Sin stock</option>
+                </select>
+                <div className="view-toggle">
+                    <button 
+                        className={viewMode === 'grid' ? 'active' : ''} 
+                        onClick={() => setViewMode('grid')}
+                        title="Vista Cuadrícula"
+                    >
+                        ⊞
+                    </button>
+                    <button 
+                        className={viewMode === 'list' ? 'active' : ''} 
+                        onClick={() => setViewMode('list')}
+                        title="Vista Lista"
+                    >
+                        ☰
+                    </button>
+                </div>
             </div>
 
             {filteredProducts.length === 0 ? (
@@ -41,7 +82,7 @@ export function ProductList({ products, onDelete, onUpdateStock, onEdit }) {
                     No se encontraron productos que coincidan con "{searchTerm}"
                 </div>
             ) : (
-                <div className="product-grid">
+                <div className={viewMode === 'grid' ? 'product-grid' : 'product-list-view'}>
                     {filteredProducts.map(product => {
 
                         const minStock = product.minStock || product.min_stock || 5;
@@ -55,19 +96,21 @@ export function ProductList({ products, onDelete, onUpdateStock, onEdit }) {
                                     </div>
                                 )}
 
-                                <div className="product-header">
-                                    <h3>{product.name}</h3>
-                                    <span className={`stock-badge ${isLowStock ? 'low-stock' : 'in-stock'}`}>
-                                        {product.quantity} unid.
-                                    </span>
+                                <div className="product-info">
+                                    <div className="product-header">
+                                        <h3>{product.name}</h3>
+                                        <span className={`stock-badge ${isLowStock ? 'low-stock' : 'in-stock'}`}>
+                                            {product.quantity} unid.
+                                        </span>
+                                    </div>
+
+                                    <p className="product-price">${Number(product.price).toFixed(2)}</p>
+                                    {product.cost > 0 && (
+                                        <small className="product-cost">Costo: ${Number(product.cost).toFixed(2)}</small>
+                                    )}
+
+                                    {product.description && <p className="product-desc">{product.description}</p>}
                                 </div>
-
-                                <p className="product-price">${Number(product.price).toFixed(2)}</p>
-                                {product.cost > 0 && (
-                                    <small className="product-cost">Costo: ${Number(product.cost).toFixed(2)}</small>
-                                )}
-
-                                {product.description && <p className="product-desc">{product.description}</p>}
 
                                 <div className="product-actions">
                                     <button
