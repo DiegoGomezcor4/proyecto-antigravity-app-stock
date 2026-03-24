@@ -14,18 +14,33 @@ export function SalesRegister({ products, customers, onSell }) {
         e.preventDefault();
         if (!product) return;
 
+        const qtyNum = Number(qty);
+        // Check if existing in cart
+        const existingItemIndex = cart.findIndex(item => item.product.id === product.id);
+        const currentCartQty = existingItemIndex >= 0 ? cart[existingItemIndex].quantity : 0;
+
         // Check if enough stock
-        if (product.quantity < qty) {
-            toast.error('No hay suficiente stock');
+        if (product.quantity < currentCartQty + qtyNum) {
+            toast.error('No hay suficiente stock para esa cantidad');
             return;
         }
 
-        setCart(prev => [...prev, {
-            product,
-            quantity: Number(qty),
-            subtotal: product.price * qty,
-            cost: product.cost * qty // Store cost snapshot for profit calc
-        }]);
+        if (existingItemIndex >= 0) {
+            setCart(prev => {
+                const newCart = [...prev];
+                newCart[existingItemIndex].quantity += qtyNum;
+                newCart[existingItemIndex].subtotal = product.price * newCart[existingItemIndex].quantity;
+                newCart[existingItemIndex].cost = product.cost * newCart[existingItemIndex].quantity;
+                return newCart;
+            });
+        } else {
+            setCart(prev => [...prev, {
+                product,
+                quantity: qtyNum,
+                subtotal: product.price * qtyNum,
+                cost: product.cost * qtyNum 
+            }]);
+        }
 
         setSelectedProduct('');
         setQty(1);
