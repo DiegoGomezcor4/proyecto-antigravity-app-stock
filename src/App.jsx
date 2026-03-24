@@ -128,11 +128,11 @@ function App() {
               <div className="card" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2>Inventario Actual</h2>
                 <span style={{ color: 'var(--color-text-secondary)' }}>
-                  {products.length} productos
+                  {products.length} {products.length === 1 ? 'producto' : 'productos'}
                 </span>
               </div>
               <ProductList
-                products={products}
+                products={editingProduct ? products.filter(p => p.id === editingProduct.id) : products}
                 onDelete={deleteProduct}
                 onUpdateStock={updateProduct}
                 onEdit={setEditingProduct}

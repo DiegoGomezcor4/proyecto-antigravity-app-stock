@@ -102,7 +102,7 @@ export function CatalogView({ onRequestLogin }) {
             <div className="main-layout" style={{ gridTemplateColumns: isCartOpen ? '1fr 350px' : '1fr' }}>
                 {/* Product Grid */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div className="search-bar" style={{ display: 'flex', gap: '1rem' }}>
+                    <div className="search-bar" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                         <input
                             type="text"
                             placeholder="Buscar en el catálogo..."
@@ -110,6 +110,7 @@ export function CatalogView({ onRequestLogin }) {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             style={{
                                 flex: 1,
+                                minWidth: '250px',
                                 padding: '1rem',
                                 fontSize: '1.1rem',
                                 borderRadius: '8px',

@@ -27,7 +27,7 @@ export function ProductList({ products, onDelete, onUpdateStock, onEdit }) {
 
     return (
         <div className="product-list-container">
-            <div className="search-bar" style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
+            <div className="search-bar" style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                 <input
                     type="text"
                     placeholder="Buscar producto..."
@@ -35,6 +35,7 @@ export function ProductList({ products, onDelete, onUpdateStock, onEdit }) {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     style={{
                         flex: 1,
+                        minWidth: '250px',
                         padding: '0.8rem',
                         borderRadius: '8px',
                         border: '1px solid var(--color-border)',
