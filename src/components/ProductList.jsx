@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 export function ProductList({ products, onDelete, onUpdateStock, onEdit }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [stockFilter, setStockFilter] = useState('all');
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+    const [viewMode, setViewMode] = useState('list'); // 'grid' | 'list'
 
     const filteredProducts = products.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
